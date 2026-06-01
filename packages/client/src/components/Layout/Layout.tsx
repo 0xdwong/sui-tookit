@@ -88,7 +88,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </NavLink>
                 <NavLink to="/faucet">{t("navigation.faucet")}</NavLink>
                 <Link
-                  href="https://github.com/0xdwong/sui-mcp"
+                  href="https://github.com/deanplus/sui-mcp"
                   target="_blank"
                   rel="noopener noreferrer"
                   px={2}
@@ -129,10 +129,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               {t("common.footer", { year: new Date().getFullYear() })}
             </Text>
             <HStack gap={4}>
-              <Link href="https://github.com/0xdwong/sui-toolkit" target="_blank">
+              <Link href="https://github.com/deanplus/sui-toolkit" target="_blank">
                 <Icon as={FaGithub} boxSize={5} color="gray.600" />
               </Link>
-              <Link href="https://x.com/0xdwong" target="_blank">
+              <Link href="https://x.com/deanplus" target="_blank">
                 <Icon as={FaTwitter} boxSize={5} color="gray.600" />
               </Link>
             </HStack>

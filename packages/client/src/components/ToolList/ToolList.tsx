@@ -41,7 +41,7 @@ const tools: Tool[] = [
     titleKey: "tools.mcp.title",
     descriptionKey: "tools.mcp.description",
     icon: FiKey,
-    href: "https://github.com/0xdwong/sui-mcp",
+    href: "https://github.com/deanplus/sui-mcp",
   },
 ];
 
