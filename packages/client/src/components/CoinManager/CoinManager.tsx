@@ -711,7 +711,7 @@ const CoinManager: React.FC = () => {
 
             // Use the first selected coin as merge target
             const primaryCoin = selectedCoinIds[0];
-            const otherCoins = selectedCoinIds.slice(1);
+            const otherCoins = selectedCoinIds.slice(1, 512);
             tx.mergeCoins(primaryCoin, otherCoins);
           }
 

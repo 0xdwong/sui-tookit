@@ -4,5 +4,5 @@
 ./build-walrus.sh
 
 # update the site
-site-builder update --epochs 1 ./build 0xd4e6192958e4f466420fd8e5f7d00787aa34d2b8e6ba8099152bc113fffd025c
+site-builder update --epochs 2 ./build 0x38c4520e1153d38e00af76631a01a8698c7ec720aa41e1d6b2d918eb69eea03b
 

@@ -278,17 +278,9 @@ const CoinOperationDialog: React.FC<CoinOperationDialogProps> = ({
     // For SUI merging, ensure we're not including the highest balance SUI in the selected list
     if (operationType === "merge") {
       // Filter out highest balance SUI coins for each SUI type in batch mode
+      const highestSuiCoinId = highestBalanceSuiIds["0x2::sui::SUI"];
       const filteredSelectedCoinIds = selectedCoinIds.filter(id => {
-        // Check if this is a SUI coin
-        for (const [type, data] of Object.entries(coinsByType)) {
-          if (type === "0x2::sui::SUI") {
-            // Skip if this is the highest balance SUI coin
-            if (id === highestBalanceSuiIds[type]) {
-              return false;
-            }
-          }
-        }
-        return true;
+        return id !== highestSuiCoinId;
       });
       
       onConfirm(filteredSelectedCoinIds);
@@ -296,45 +288,6 @@ const CoinOperationDialog: React.FC<CoinOperationDialogProps> = ({
       onConfirm(selectedCoinIds);
     }
   };
-
-  // Helper function to check if a coin is burnable (zero balance or low value)
-  const isBurnableCoin = useCallback((coin: ExtendedCoinObject, type: string): boolean => {
-    // Always include zero balance coins
-    if (Number(coin.balance) === 0) {
-      return true;
-    }
-
-    // For SUI coins, ensure we keep at least 1 non-zero balance coin
-    if (type === "0x2::sui::SUI") {
-      const suiCoins = coinsByType[type]?.coins || [];
-      const nonZeroSuiCoins = suiCoins
-        .filter((c: ExtendedCoinObject) => Number(c.balance) > 0)
-        .sort((a, b) => Number(BigInt(b.balance) - BigInt(a.balance))); // Sort by balance desc
-
-      // Keep the highest balance coin
-      const isHighestBalance = nonZeroSuiCoins[0]?.id === coin.id;
-      if (isHighestBalance) {
-        return false;
-      }
-
-      // For other SUI coins with price, check value
-      if (coin.price) {
-        const value = Number(coin.balance) / Math.pow(10, coin.decimals || decimals) * Number(coin.price);
-        const isLowValue = value < 0.1;
-        return isLowValue;
-      }
-    }
-
-    // Check for low value if price is available
-    if (coin.price) {
-      const value = Number(coin.balance) / Math.pow(10, coin.decimals || decimals) * Number(coin.price);
-      const isLowValue = value < 0.1;
-      return isLowValue;
-    }
-
-    // If no price data available and non-zero balance, include the coin
-    return true;
-  }, [coinsByType, decimals]);
 
   // Calculate total selectable coins
   const getTotalSelectableCoins = useCallback(() => {

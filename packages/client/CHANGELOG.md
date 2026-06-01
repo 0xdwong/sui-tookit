@@ -3,6 +3,11 @@
 
 ## [0.3.1] 
 
+### Fixed - 2026-06-01
+- Client startup:
+  - Aligned `@mysten/sui` with dapp-kit to avoid duplicate `Transaction` types in wallet signing.
+  - Removed unused Coin Operation Dialog code that triggered ESLint warnings.
+
 ### Added - 2025-05-29
 - Coin Manager improvements:
   - Added two-step confirmation for merge and clean operation
