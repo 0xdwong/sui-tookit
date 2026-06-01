@@ -124,6 +124,8 @@
     "mergeCoins": "Merge Coins",
     "cleanCoins": "Clean Zero Balance Coins",
     "gasReserved": "Reserved for gas",
+    "mergeSelectionLimitNotice": "A single merge supports at most {{limit}} objects. Selection has been narrowed to {{limit}} objects.",
+    "mergeSelectionLimitHelp": "{{total}} objects are available. A single merge supports at most {{limit}} objects, so Select All will keep only the first {{limit}}.",
     "suiMergeNote": "Note: When merging SUI coins, the highest balance SUI coin will be reserved for gas payment and won't participate in the merge. The remaining selected SUI coins will be merged together. This ensures you'll always have a SUI coin available for gas."
   },
   "bulkTransfer": {

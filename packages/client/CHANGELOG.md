@@ -7,6 +7,8 @@
 - Client startup:
   - Aligned `@mysten/sui` with dapp-kit to avoid duplicate `Transaction` types in wallet signing.
   - Removed unused Coin Operation Dialog code that triggered ESLint warnings.
+- Coin Manager:
+  - Capped merge selections at 512 coin objects, with a warning when Select All has to narrow a larger selection.
 
 ### Added - 2025-05-29
 - Coin Manager improvements:

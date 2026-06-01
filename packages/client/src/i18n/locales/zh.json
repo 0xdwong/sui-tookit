@@ -124,6 +124,8 @@
     "mergeCoins": "合并代币",
     "cleanCoins": "清理零余额代币",
     "gasReserved": "预留作为燃料费",
+    "mergeSelectionLimitNotice": "单笔合并最多支持 {{limit}} 个对象，已自动缩窄到 {{limit}} 个。",
+    "mergeSelectionLimitHelp": "当前可选对象共 {{total}} 个；单笔合并最多支持 {{limit}} 个对象，全选时会自动只保留前 {{limit}} 个。",
     "suiMergeNote": "注意: 合并 SUI 代币时，余额最高的 SUI 代币将被预留用于支付燃料费，不会参与合并。剩余选中的 SUI 代币将会被合并在一起。这确保你始终有一个 SUI 代币可用于支付燃料费。"
   },
   "bulkTransfer": {

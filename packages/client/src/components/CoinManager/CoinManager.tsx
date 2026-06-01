@@ -21,7 +21,13 @@ import toast from "react-hot-toast";
 import { formatCoinType, formatBalance } from "./utils";
 import { useWalletNetwork } from "../CustomConnectButton";
 import { getPriceDirectAPI, calculateValue } from "../../utils/priceUtils";
-import { USDC_COIN_TYPE, SUI_TYPE_ARG, WUSDC_COIN_TYPE, USDC_COIN_DECIMALS } from "../../utils/constants";
+import {
+  MAX_MERGE_COIN_OBJECTS,
+  USDC_COIN_TYPE,
+  SUI_TYPE_ARG,
+  WUSDC_COIN_TYPE,
+  USDC_COIN_DECIMALS,
+} from "../../utils/constants";
 
 // Import types and subcomponents
 import { CoinTypeSummary, LoadingState, CoinObject } from "./types";
@@ -43,6 +49,15 @@ const CoinManager: React.FC = () => {
   const suiClient = useSuiClient();
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
   const walletNetwork = useWalletNetwork(true);
+
+  const limitMergeCoinIds = useCallback((coinIds: string[]) => {
+    if (coinIds.length <= MAX_MERGE_COIN_OBJECTS) {
+      return coinIds;
+    }
+
+    toast(t("coinManager.mergeSelectionLimitNotice", { limit: MAX_MERGE_COIN_OBJECTS }));
+    return coinIds.slice(0, MAX_MERGE_COIN_OBJECTS);
+  }, [t]);
 
   // Unified loading state management
   const [loadingState, setLoadingState] = useState<LoadingState>({
@@ -456,7 +471,7 @@ const CoinManager: React.FC = () => {
           const coinsByType = new Map<string, string[]>();
 
           // Group selected coins by type
-          selectedCoinIds.forEach(coinId => {
+          limitMergeCoinIds(selectedCoinIds).forEach(coinId => {
             for (const summary of coinTypeSummaries) {
               const coin = summary.objects.find(c => c.id === coinId);
               if (coin) {
@@ -494,7 +509,7 @@ const CoinManager: React.FC = () => {
               console.log(`Using highest balance SUI as gas (not for merging): ${gasCoinId}`);
               
               // Filter out gas object from selected coins
-              const mergeCandidates = coinIds.filter(id => id !== gasCoinId);
+              const mergeCandidates = limitMergeCoinIds(coinIds.filter(id => id !== gasCoinId));
               console.log(`Selected SUI coins after filtering gas coin: ${mergeCandidates.length}`);
               
               // Ensure there are enough coins to merge
@@ -512,11 +527,12 @@ const CoinManager: React.FC = () => {
               tx.mergeCoins(primaryCoin, otherCoins);
             } else {
               // For non-SUI coins, need at least 2 coins to merge
-              if (coinIds.length < 2) continue;
+              const mergeCoinIds = limitMergeCoinIds(coinIds);
+              if (mergeCoinIds.length < 2) continue;
 
               // Use first selected coin as merge target
-              const primaryCoin = coinIds[0];
-              const otherCoins = coinIds.slice(1);
+              const primaryCoin = mergeCoinIds[0];
+              const otherCoins = mergeCoinIds.slice(1);
               tx.mergeCoins(primaryCoin, otherCoins);
             }
           }
@@ -685,7 +701,7 @@ const CoinManager: React.FC = () => {
             console.log(`Using highest balance SUI as gas (not for merging): ${gasCoinId}`);
             
             // Filter out gas coin from selected coins
-            const mergeCandidates = selectedCoinIds.filter(id => id !== gasCoinId);
+            const mergeCandidates = limitMergeCoinIds(selectedCoinIds.filter(id => id !== gasCoinId));
             console.log(`Selected coins after filtering gas coin: ${mergeCandidates.length}`);
             
             // Verify we still have enough coins to merge
@@ -710,8 +726,9 @@ const CoinManager: React.FC = () => {
             }
 
             // Use the first selected coin as merge target
-            const primaryCoin = selectedCoinIds[0];
-            const otherCoins = selectedCoinIds.slice(1, 512);
+            const mergeCoinIds = limitMergeCoinIds(selectedCoinIds);
+            const primaryCoin = mergeCoinIds[0];
+            const otherCoins = mergeCoinIds.slice(1);
             tx.mergeCoins(primaryCoin, otherCoins);
           }
 

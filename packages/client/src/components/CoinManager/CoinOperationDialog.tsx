@@ -12,8 +12,10 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
+import toast from "react-hot-toast";
 import { CoinObject } from "./types";
 import { formatBalance, formatCoinId } from "./utils";
+import { MAX_MERGE_COIN_OBJECTS } from "../../utils/constants";
 
 interface CoinOperationDialogProps {
   isOpen: boolean;
@@ -68,6 +70,18 @@ const CoinOperationDialog: React.FC<CoinOperationDialogProps> = ({
   
   // Check if it's batch mode (multiple coin types)
   const isBatchMode = coinType === "batch-operation";
+
+  const limitMergeSelection = useCallback((coinIds: string[], showNotice = false) => {
+    if (operationType !== "merge" || coinIds.length <= MAX_MERGE_COIN_OBJECTS) {
+      return coinIds;
+    }
+
+    if (showNotice) {
+      toast(t("coinManager.mergeSelectionLimitNotice", { limit: MAX_MERGE_COIN_OBJECTS }));
+    }
+
+    return coinIds.slice(0, MAX_MERGE_COIN_OBJECTS);
+  }, [operationType, t]);
 
   // Helper function to calculate total available coins based on operation type
   const calculateTotalCoins = useCallback((coins: CoinObject[], type: string): string[] => {
@@ -242,7 +256,7 @@ const CoinOperationDialog: React.FC<CoinOperationDialogProps> = ({
           });
           
           console.log(`Auto-selected ${allIds.length} coins for batch merge`);
-          setSelectedCoinIds(allIds);
+          setSelectedCoinIds(limitMergeSelection(allIds));
         } else {
           // 单类型合并模式
           if (coinType === "0x2::sui::SUI") {
@@ -255,14 +269,14 @@ const CoinOperationDialog: React.FC<CoinOperationDialogProps> = ({
               
               // 排除最高余额的 SUI，选择其余所有 SUI
               const selectableSuiIds = sortedCoins.slice(1).map(c => c.id);
-              setSelectedCoinIds(selectableSuiIds);
+              setSelectedCoinIds(limitMergeSelection(selectableSuiIds));
             } else {
               setSelectedCoinIds([]);
             }
           } else {
             // 对于非 SUI 类型，选择所有币
             if (coins.length >= 2) {
-              setSelectedCoinIds(coins.map(c => c.id));
+              setSelectedCoinIds(limitMergeSelection(coins.map(c => c.id)));
             } else {
               setSelectedCoinIds([]);
             }
@@ -272,7 +286,7 @@ const CoinOperationDialog: React.FC<CoinOperationDialogProps> = ({
     } else {
       setSelectedCoinIds([]);
     }
-  }, [isOpen, coins, operationType, isBatchMode, coinsByType, coinType]);
+  }, [isOpen, coins, operationType, isBatchMode, coinsByType, coinType, limitMergeSelection]);
 
   const handleConfirm = () => {
     // For SUI merging, ensure we're not including the highest balance SUI in the selected list
@@ -283,7 +297,7 @@ const CoinOperationDialog: React.FC<CoinOperationDialogProps> = ({
         return id !== highestSuiCoinId;
       });
       
-      onConfirm(filteredSelectedCoinIds);
+      onConfirm(limitMergeSelection(filteredSelectedCoinIds, true));
     } else {
       onConfirm(selectedCoinIds);
     }
@@ -323,7 +337,7 @@ const CoinOperationDialog: React.FC<CoinOperationDialogProps> = ({
           validIds.forEach(id => allIds.push(id));
         }
         
-        setSelectedCoinIds(allIds);
+        setSelectedCoinIds(limitMergeSelection(allIds, true));
       } else {
         setSelectedCoinIds([]);
       }
@@ -342,7 +356,7 @@ const CoinOperationDialog: React.FC<CoinOperationDialogProps> = ({
         if (checked) {
           const currentSelected = new Set(prev);
           validIds.forEach(id => currentSelected.add(id));
-          return Array.from(currentSelected);
+          return limitMergeSelection(Array.from(currentSelected), true);
         } else {
           return prev.filter(id => !validIds.includes(id));
         }
@@ -369,6 +383,16 @@ const CoinOperationDialog: React.FC<CoinOperationDialogProps> = ({
       if (type === "0x2::sui::SUI" && coinId === highestBalanceSuiIds[type]) {
         return;
       }
+
+      if (
+        operationType === "merge" &&
+        checked &&
+        selectedCoinIds.length >= MAX_MERGE_COIN_OBJECTS &&
+        !selectedCoinIds.includes(coinId)
+      ) {
+        toast(t("coinManager.mergeSelectionLimitNotice", { limit: MAX_MERGE_COIN_OBJECTS }));
+        return;
+      }
       
       setSelectedCoinIds(prev => {
         const newSelection = new Set(prev);
@@ -387,7 +411,7 @@ const CoinOperationDialog: React.FC<CoinOperationDialogProps> = ({
           newSelection.delete(coinId);
         }
         
-        return Array.from(newSelection);
+        return limitMergeSelection(Array.from(newSelection), true);
       });
     } catch (error) {
       console.error("Error in toggleCoinSelection:", error);
@@ -580,6 +604,17 @@ const CoinOperationDialog: React.FC<CoinOperationDialogProps> = ({
                   <Box p={3} bg="blue.50" color="blue.800" borderRadius="md" mb={4}>
                     <Text fontSize="sm">
                       {t("coinManager.suiMergeNote")}
+                    </Text>
+                  </Box>
+                )}
+
+                {operationType === "merge" && totalSelectable > MAX_MERGE_COIN_OBJECTS && (
+                  <Box p={3} bg="orange.50" color="orange.800" borderRadius="md" mb={4}>
+                    <Text fontSize="sm">
+                      {t("coinManager.mergeSelectionLimitHelp", {
+                        limit: MAX_MERGE_COIN_OBJECTS,
+                        total: totalSelectable,
+                      })}
                     </Text>
                   </Box>
                 )}
